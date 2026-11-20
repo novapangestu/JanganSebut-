@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jangan Sebut!</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f1e7;--card:#fff;--ink:#1d2330;--mut:#6b6f7a;--a:#e8890c;--b:#13a58a;--bad:#d64545;--good:#1f9d57;color-scheme:light}
+:root:not([data-theme="light"]){}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171f;--card:#1f2430;--ink:#f4efe6;--mut:#a9adb8;--a:#f5a524;--b:#3ec6a8;--bad:#ff7a7a;--good:#5fd68c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14171f;--card:#1f2430;--ink:#f4efe6;--mut:#a9adb8;--a:#f5a524;--b:#3ec6a8;--bad:#ff7a7a;--good:#5fd68c;color-scheme:dark}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;padding:20px;display:flex;flex-direction:column;gap:16px;min-height:100vh}
+h1{font-size:2rem;margin:8px 0 0;line-height:1.1}
+h2{margin:0;font-size:1.4rem}
+p{margin:0;line-height:1.45}
+.mut{color:var(--mut)}
+.card{background:var(--card);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:.95rem}
+input,select{font:inherit;padding:12px;border-radius:12px;border:2px solid var(--mut);background:var(--bg);color:var(--ink)}
+button{font:inherit;font-weight:700;border:0;border-radius:16px;padding:16px;font-size:1.1rem;cursor:pointer;color:#fff;background:var(--a)}
+button.b{background:var(--b)}button.g{background:var(--good)}button.r{background:var(--bad)}
+button.o{background:var(--card);color:var(--ink);border:2px solid var(--mut)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.top{display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.timer{font-size:2rem;font-variant-numeric:tabular-nums}
+.timer.low{color:var(--bad)}
+.word{font-size:2.4rem;font-weight:800;text-align:center;padding:24px 8px;border-radius:16px;background:var(--a);color:#14171f;overflow-wrap:anywhere}
+.ban{background:var(--bg);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.ban span{font-size:1.2rem;font-weight:700;color:var(--bad);text-align:center}
+.score{display:flex;gap:10px}.score div{flex:1;background:var(--card);border-radius:16px;padding:12px;text-align:center}
+.score b{display:block;font-size:1.8rem}
+.sum{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bg)}
+.ok{color:var(--good)}.no{color:var(--bad)}
+button:disabled{opacity:.4;cursor:not-allowed}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const CARDS=[["Pantai",["Laut","Pasir","Ombak","Liburan"]],["Bakso",["Mie","Kuah","Daging","Sambal"]],["Ojek",["Motor","Helm","Antar","Aplikasi"]],["Macet",["Jalan","Mobil","Lambat","Klakson"]],["Hujan",["Air","Payung","Basah","Awan"]],["Kopi",["Minum","Kafe","Pahit","Kafein"]],["Nasi Goreng",["Nasi","Telur","Goreng","Sarapan"]],["Pacar",["Cinta","Kekasih","Jomblo","Pasangan"]],["Mantan",["Pacar","Putus","Dulu","Cinta"]],["Skripsi",["Kuliah","Dosen","Sidang","Lulus"]],["Gaji",["Uang","Bulan","Kerja","Tanggal"]],["Libur",["Kerja","Santai","Sekolah","Tanggal Merah"]],["HP",["Telepon","Layar","Chat","Pulsa"]],["Wi-Fi",["Internet","Sinyal","Password","Router"]],["Charger",["Baterai","Colok","Kabel","Listrik"]],["Selfie",["Foto","Kamera","Tongsis","Diri"]],["Kasur",["Tidur","Bantal","Empuk","Kamar"]],["Kulkas",["Dingin","Makanan","Es","Dapur"]],["Payung",["Hujan","Basah","Lindung","Buka"]],["Sandal",["Kaki","Jepit","Sepatu","Alas"]],["Gunung",["Tinggi","Mendaki","Puncak","Lava"]],["Bioskop",["Film","Popcorn","Layar","Tiket"]],["Konser",["Musik","Penyanyi","Tiket","Panggung"]],["Gitar",["Senar","Musik","Petik","Lagu"]],["Sepak Bola",["Gol","Bola","Kiper","Lapangan"]],["Badminton",["Raket","Kok","Net","Bulu Tangkis"]],["Dokter",["Sakit","Rumah Sakit","Obat","Suntik"]],["Guru",["Sekolah","Murid","Mengajar","Kelas"]],["Polisi",["Tilang","Seragam","Penjara","Lalu Lintas"]],["Tukang Parkir",["Motor","Mobil","Peluit","Uang"]],["Arisan",["Ibu","Kumpul","Undi","Uang"]],["Lebaran",["Mudik","THR","Ketupat","Idul Fitri"]],["Mudik",["Pulang","Kampung","Lebaran","Macet"]],["Kondangan",["Nikah","Undangan","Amplop","Pesta"]],["Es Teh",["Minum","Manis","Dingin","Gelas"]],["Martabak",["Manis","Telur","Terang Bulan","Adonan"]],["Sambal",["Pedas","Cabai","Terasi","Makan"]],["Alarm",["Bangun","Bunyi","Pagi","Jam"]],["Gym",["Otot","Angkat","Beban","Olahraga"]]];
+const $=document.getElementById("app");
+let S={screen:"setup",names:["Tim Satu","Tim Dua"],dur:60,rounds:2,scores:[0,0],turn:0,deck:[],card:null,log:[],left:0,end:0,tid:null,custom:[],skips:3};
+function newDeck(){return shuffle(CARDS).concat(shuffle(S.custom))}
+let mute=false,AC=null;
+function snd(f,d,type,v){if(mute)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type=type||"sine";o.frequency.value=f;g.gain.setValueAtTime(v||.2,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function nextCard(){if(!S.deck.length)S.deck=newDeck();S.card=S.deck.pop()}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function scoreBar(){return `<div class="score">${S.names.map((n,i)=>`<div><span class="mut">${esc(n)}</span><b>${S.scores[i]}</b></div>`).join("")}</div>`}
+function team(){return S.turn%2}
+function render(){
+ if(S.screen==="setup"){
+  $.innerHTML=`<h1>Jangan Sebut!</h1><p class="mut">Jelaskan kata di kartu ke timmu tanpa menyebut kata terlarang. Oper HP ke penjelas tiap giliran.</p>
+  <div class="card"><label>Nama tim 1<input id="n0" value="${esc(S.names[0])}" maxlength="16"></label>
+  <label>Nama tim 2<input id="n1" value="${esc(S.names[1])}" maxlength="16"></label>
+  <label>Waktu per giliran<select id="dur">${[45,60,90].map(v=>`<option value="${v}"${v===S.dur?" selected":""}>${v} detik</option>`).join("")}</select></label>
+  <label>Putaran (tiap tim jadi penjelas)<select id="rounds">${[1,2,3,4].map(v=>`<option${v===S.rounds?" selected":""}>${v}</option>`).join("")}</select></label></div>
+  <button class="o" id="snd">${mute?"🔇 Suara mati":"🔊 Suara nyala"}</button><div class="card"><h2>Kartu bikinan sendiri</h2><p class="mut">Tambah kata dan minimal 3 kata terlarang (pisahkan dengan koma). Kartu ini keluar duluan.</p><input id="cw" placeholder="Kata, misal: Kos-kosan" maxlength="24"><input id="cb" placeholder="Terlarang: murah, kamar, bayar" maxlength="80"><p id="err" class="no"></p><button class="b" id="add">+ Tambah Kartu</button>${S.custom.map((c,i)=>`<div class="sum"><span><b>${esc(c[0])}</b> <span class="mut">${esc(c[1].join(", "))}</span></span><button class="o" style="padding:4px 10px;font-size:.9rem" data-d="${i}">Hapus</button></div>`).join("")}</div>
+  <button id="go">Mulai Main</button>
+  <div class="card"><h2>Aturan singkat</h2><p>✅ Benar: +1 poin<br>🚫 Kena kata terlarang: −1 poin<br>⏭️ Lewati: 0 poin<br>Dilarang bilang kata di kartu, kata terlarang, atau memberi isyarat.</p></div>`;
+  const keep=()=>{S.names=[document.getElementById("n0").value.trim()||"Tim Satu",document.getElementById("n1").value.trim()||"Tim Dua"];S.dur=+document.getElementById("dur").value;S.rounds=+document.getElementById("rounds").value};
+  document.getElementById("snd").onclick=()=>{keep();mute=!mute;render()};
+  document.getElementById("add").onclick=()=>{const w=document.getElementById("cw").value.trim(),b=document.getElementById("cb").value.split(",").map(x=>x.trim()).filter(Boolean).slice(0,5);if(!w||b.length<3){document.getElementById("err").textContent="Isi kata dan minimal 3 kata terlarang, pisahkan dengan koma.";return}keep();S.custom.push([w,b]);render()};
+  $.querySelectorAll("[data-d]").forEach(x=>x.onclick=()=>{keep();S.custom.splice(+x.dataset.d,1);render()});
+  document.getElementById("go").onclick=()=>{S.names=[document.getElementById("n0").value.trim()||"Tim Satu",document.getElementById("n1").value.trim()||"Tim Dua"];S.dur=+document.getElementById("dur").value;S.rounds=+document.getElementById("rounds").value;S.scores=[0,0];S.turn=0;S.deck=newDeck();S.screen="ready";render()};
+ }else if(S.screen==="ready"){
+  const t=team();
+  $.innerHTML=`${scoreBar()}<div class="card" style="margin-top:8px"><p class="mut">Giliran ${S.turn+1} dari ${S.rounds*2}</p><h1>${esc(S.names[t])}</h1><p>Pilih satu penjelas. HP dipegang <b>tim lawan</b> (atau wasit), layarnya menghadap penjelas dan tim lawan, bukan ke tim penjelas. Penjelas bicara, pemegang HP menekan ✅ kalau tim menebak benar, dan 🚫 kalau penjelas kelepasan menyebut kata terlarang.</p></div><button id="st" class="${t?"b":""}">Siap, mulai!</button>`;
+  document.getElementById("st").onclick=()=>{snd(660,.12);S.log=[];S.skips=3;nextCard();S.end=Date.now()+S.dur*1000;S.screen="play";render();tick()};
+ }else if(S.screen==="play"){
+  const [w,ban]=S.card;
+  $.innerHTML=`<div class="top"><span>${esc(S.names[team()])}</span><span class="timer" id="tm">${S.dur}</span></div>
+  <div class="word">${esc(w)}</div><div class="ban"><p class="mut" style="text-align:center">Dilarang disebut:</p>${ban.map(b=>`<span>${esc(b)}</span>`).join("")}</div>
+  <div class="row"><button class="g" data-a="1">✅ Benar</button><button class="r" data-a="-1">🚫 Kena</button></div>
+  <button class="o" data-a="0"${S.skips?"":" disabled"}>⏭️ Lewati (sisa ${S.skips})</button>`;
+  $.querySelectorAll("button").forEach(b=>b.onclick=()=>answer(+b.dataset.a));
+ }else if(S.screen==="sum"){
+  const t=team(),pts=S.log.reduce((s,x)=>s+x.p,0);
+  $.innerHTML=`<h1>Waktu habis!</h1><div class="card"><h2>${esc(S.names[t])}: ${pts>=0?"+":""}${pts} poin</h2>${S.log.length?S.log.map(x=>`<div class="sum"><span>${esc(x.w)}</span><span class="${x.p>0?"ok":x.p<0?"no":"mut"}">${x.p>0?"✅ +1":x.p<0?"🚫 −1":"⏭️ 0"}</span></div>`).join(""):`<p class="mut">Tidak ada kartu yang dimainkan.</p>`}</div>${scoreBar()}<button id="nx">${S.turn+1>=S.rounds*2?"Lihat Hasil":"Giliran Berikutnya"}</button>`;
+  document.getElementById("nx").onclick=()=>{S.turn++;S.screen=S.turn>=S.rounds*2?"final":"ready";render()};
+ }else{
+  const [a,b]=S.scores,win=a===b?"Seri!":`${esc(S.names[a>b?0:1])} menang! 🎉`;
+  $.innerHTML=`<h1>${win}</h1>${scoreBar()}<button id="again">Main Lagi</button>`;
+  document.getElementById("again").onclick=()=>{S.screen="setup";render()};
+ }
+}
+function answer(p){if(p===0){if(!S.skips)return;S.skips--}if(p>0){snd(880,.12);setTimeout(()=>snd(1320,.15),110)}else if(p<0)snd(150,.4,"sawtooth",.25);else snd(500,.08,"triangle");S.log.push({w:S.card[0],p});S.scores[team()]+=p;nextCard();render();tick(true)}
+function tick(skip){
+ clearInterval(S.tid);
+ const upd=()=>{const left=Math.max(0,Math.ceil((S.end-Date.now())/1000));if(left!==S.last){S.last=left;if(left>0&&left<=10)snd(left<=3?1400:1000,.08,"square",.08)}const el=document.getElementById("tm");if(el){el.textContent=left;el.classList.toggle("low",left<=10)}
+  if(left<=0){clearInterval(S.tid);snd(300,.7,"sawtooth",.25);try{navigator.vibrate&&navigator.vibrate(400)}catch(e){}S.screen="sum";render()}};
+ S.tid=setInterval(upd,250);upd();
+}
+render();
+</script>
+</body>
+</html>
